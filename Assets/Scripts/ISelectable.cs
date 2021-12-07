@@ -20,14 +20,18 @@ public class SelectableVertex : ISelectable
     public override void OnSelect()
     {
         Selected = true;
+        vertex.Color = Color.yellow;
+        
         EditorController.Instance.SelectedVertices.Add(vertex);
     }
 
     public override void OnDeselect()
     {
         if (!EditorController.Instance.SelectedVertices.Contains(vertex)) { return; }
-
+        
         Selected = false;
+        vertex.Color = Color.red;
+        
         EditorController.Instance.SelectedVertices.Remove(vertex);
     }
 }

@@ -152,8 +152,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbea31db241c42642b086f27bc8215aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HandlesLength: 2
-  _arrowheadSize: 0.15
+  HandleLength: {x: 2, y: 2, z: 2}
+  HandleActualLength: 2
+  HandleSize: {x: 0.2, y: 0.2, z: 0.2}
+  _selectedHandleSize: 0.25
 --- !u!4 &748340360
 Transform:
   m_ObjectHideFlags: 0
@@ -357,6 +359,7 @@ MonoBehaviour:
   range: 1
   handleSensitivity: 0.5
   HoveredAxis: 0
+  Selecting: 0
   Grabbing: 0
   GrabbedAxis: 0
 --- !u!4 &1555375964

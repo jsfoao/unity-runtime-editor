@@ -1,5 +1,6 @@
 using System;
 using Drawing;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using Plane = UnityEngine.Plane;
 using Vector3 = UnityEngine.Vector3;
@@ -22,12 +23,14 @@ public class MouseController : MonoBehaviour
     private Vector3 zProjection;
 
     private Vector3 _clickedX;
+    public bool Selecting;
     public bool Grabbing;
     public Axis GrabbedAxis;
 
     private EditorController _editorController;
     
     private Vector3 _dragOrigin;
+    private Vertex _selectedVertex;
 
     private void Update()
     {
@@ -40,8 +43,23 @@ public class MouseController : MonoBehaviour
         {
             if (HoveredAxis == Axis.None)
             {
-                TrySelection();
-                _dragOrigin = Vector3.zero;
+                Vertex newSelectedVertex = TrySelectVertex();
+                if (newSelectedVertex != null)
+                {
+                    Selecting = true;
+                    _selectedVertex?.Selectable.OnDeselect();
+                    _selectedVertex = newSelectedVertex;
+                    _selectedVertex.Selectable.OnSelect();
+                    _dragOrigin = Vector3.zero;
+                }
+                else
+                {
+                    Selecting = false;
+                    if (_selectedVertex != null)
+                    {
+                        _selectedVertex.Selectable.OnDeselect();
+                    }
+                }
             }
 
             if (!Grabbing)
@@ -95,7 +113,7 @@ public class MouseController : MonoBehaviour
         }
     }
 
-    private void TrySelection()
+    private Vertex TrySelectVertex()
     {
         Ray mouseRay = _camera.ScreenPointToRay(Input.mousePosition);
         Transform cameraTransform = _camera.transform;
@@ -106,24 +124,17 @@ public class MouseController : MonoBehaviour
             if (vertexPlane.Raycast(mouseRay, out float distanceMouse))
             {
                 Vector3 intersectMouse = mouseRay.GetPoint(distanceMouse);
-                
-                // Select vertex
                 if ((intersectMouse - vertex.Position).magnitude <= range)
                 {
-                    vertex.Selectable.OnSelect();
-                }
-                // Deselect
-                else
-                {
-                    vertex.Selectable.OnDeselect();
+                    return vertex;
                 }
             }
         }
+        return null;
     }
 
     private Axis HoveringAxis(Vector3 position)
     {
-        // Creating planes
         Vector3 xPoint = position + Vector3.right;
         Vector3 yPoint = position + Vector3.up;
         Vector3 zPoint = position + Vector3.forward;
@@ -141,15 +152,15 @@ public class MouseController : MonoBehaviour
         zProjection = new Vector3(0f, 0f, Vector3.Dot(intersectXZ - position, Vector3.forward));
         yProjection = new Vector3(0f, Vector3.Dot(intersectXY - position, Vector3.up), 0f);
 
-        if ((xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandlesLength && Mathf.Sign(relativeXZ.x) >= 0)
+        if ((xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleActualLength && Mathf.Sign(relativeXZ.x) >= 0)
         {
             return Axis.X;
         }
-        if ((zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandlesLength && Mathf.Sign(relativeXZ.z) >= 0)
+        if ((zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleActualLength && Mathf.Sign(relativeXZ.z) >= 0)
         {
             return Axis.Z;
         }
-        if ((yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandlesLength && Mathf.Sign(relativeXY.z) >= 0)
+        if ((yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandleActualLength && Mathf.Sign(relativeXY.y) >= 0)
         {
             return Axis.Y;
         }
@@ -164,16 +175,6 @@ public class MouseController : MonoBehaviour
         return intersectionPoint;
     }
 
-    private void OnHoverAxisIn()
-    {
-        HoveredAxis = Axis.X;
-    }
-
-    private void OnHoverAxisOut()
-    { 
-        HoveredAxis = Axis.None;
-    }
-    
     private void Awake()
     {
         #region Singleton
