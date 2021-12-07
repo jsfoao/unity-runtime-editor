@@ -1,6 +1,4 @@
 using System;
-using Drawing;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using Plane = UnityEngine.Plane;
 using Vector3 = UnityEngine.Vector3;
@@ -152,15 +150,15 @@ public class MouseController : MonoBehaviour
         zProjection = new Vector3(0f, 0f, Vector3.Dot(intersectXZ - position, Vector3.forward));
         yProjection = new Vector3(0f, Vector3.Dot(intersectXY - position, Vector3.up), 0f);
 
-        if ((xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleActualLength && Mathf.Sign(relativeXZ.x) >= 0)
+        if ((xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.x) >= 0)
         {
             return Axis.X;
         }
-        if ((zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleActualLength && Mathf.Sign(relativeXZ.z) >= 0)
+        if ((zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.z) >= 0)
         {
             return Axis.Z;
         }
-        if ((yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandleActualLength && Mathf.Sign(relativeXY.y) >= 0)
+        if ((yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXY.y) >= 0)
         {
             return Axis.Y;
         }
