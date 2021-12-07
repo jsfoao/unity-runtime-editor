@@ -1,7 +1,6 @@
+using System;
 using Drawing;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Plane = UnityEngine.Plane;
 using Vector3 = UnityEngine.Vector3;
 
@@ -9,58 +8,107 @@ public enum Axis
 {
     None, X, Y, Z
 }
+
 public class MouseController : MonoBehaviour
 {
-    [SerializeField] private float _range = 1f;
+    public static MouseController Instance;
+    [SerializeField] private float range = 1f;
+    [SerializeField] private float handleSensitivity = 1f;
     private Camera _camera;
-    private Axis _hoveredAxis;
+    public Axis HoveredAxis;
 
-    private Vector3 _intersectX;
-    private Vector3 _intersectY;
-    private Vector3 _intersectZ;
+    private Vector3 xProjection;
+    private Vector3 yProjection;
+    private Vector3 zProjection;
 
     private Vector3 _clickedX;
+    public bool Grabbing;
+    public Axis GrabbedAxis;
+
+    private EditorController _editorController;
+    
+    private Vector3 _dragOrigin;
 
     private void Update()
     {
-        if (EditorController.Instance.SelectedVertices.Count != 0)
+        if (_editorController.SelectedVertex())
         {
-            NewCalculateHandles(EditorController.Instance.SelectedVertices[0].Position);
+            HoveredAxis = HoveringAxis(_editorController.SelectedVertices[0].Position);
         }
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (_hoveredAxis == Axis.None)
+            if (HoveredAxis == Axis.None)
             {
                 TrySelection();
+                _dragOrigin = Vector3.zero;
             }
-            if (_hoveredAxis == Axis.X)
+
+            if (!Grabbing)
             {
-                Vertex vertex = EditorController.Instance.SelectedVertices[0];
-                vertex.Position += _intersectX.normalized - new Vector3(0.9f, 0f, 0f);
+                switch (HoveredAxis)
+                {
+                    case Axis.X:
+                        GrabbedAxis = Axis.X;
+                        _dragOrigin = xProjection;
+                        Grabbing = true;
+                        break;
+                    case Axis.Z:
+                        GrabbedAxis = Axis.Z;
+                        _dragOrigin = zProjection;
+                        Grabbing = true;
+                        break;
+                    case Axis.Y:
+                        GrabbedAxis = Axis.Y;
+                        _dragOrigin = yProjection;
+                        Grabbing = true;
+                        break;
+                    case Axis.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
+        if (Grabbing)
+        {
+            Vertex vertex = EditorController.Instance.SelectedVertices[0];
+            switch (GrabbedAxis)
+            {
+                case Axis.X:
+                    vertex.Position += xProjection - _dragOrigin;
+                    break;
+                case Axis.Y:
+                    vertex.Position += yProjection - _dragOrigin;
+                    break;
+                case Axis.Z:
+                    vertex.Position += zProjection - _dragOrigin;
+                    break;
+            }
+        }
+        
         if (Input.GetMouseButtonUp(0))
         {
-            
+            GrabbedAxis = Axis.None;
+            Grabbing = false;
         }
     }
 
     private void TrySelection()
     {
-        Ray _mouseRay = _camera.ScreenPointToRay(Input.mousePosition);
+        Ray mouseRay = _camera.ScreenPointToRay(Input.mousePosition);
         Transform cameraTransform = _camera.transform;
         foreach (Vertex vertex in GraphMesh.Instance.Graph.Vertices)
         {
             Plane vertexPlane = new Plane(vertex.Position, vertex.Position + cameraTransform.up, vertex.Position + cameraTransform.right);
             
-            if (vertexPlane.Raycast(_mouseRay, out float distanceMouse))
+            if (vertexPlane.Raycast(mouseRay, out float distanceMouse))
             {
-                Vector3 intersectMouse = _mouseRay.GetPoint(distanceMouse);
+                Vector3 intersectMouse = mouseRay.GetPoint(distanceMouse);
                 
                 // Select vertex
-                if ((intersectMouse - vertex.Position).magnitude <= _range)
+                if ((intersectMouse - vertex.Position).magnitude <= range)
                 {
                     vertex.Selectable.OnSelect();
                 }
@@ -73,62 +121,80 @@ public class MouseController : MonoBehaviour
         }
     }
 
-    private void NewCalculateHandles(Vector3 position)
+    private Axis HoveringAxis(Vector3 position)
     {
+        // Creating planes
         Vector3 xPoint = position + Vector3.right;
         Vector3 yPoint = position + Vector3.up;
         Vector3 zPoint = position + Vector3.forward;
-        Plane _planeXZ = new Plane(position, xPoint, zPoint);
-        Plane _planeXY = new Plane(position, xPoint, yPoint);
-        Plane _planeYZ = new Plane(position, yPoint, zPoint);
-        
-        Ray _mouseRay = _camera.ScreenPointToRay(Input.mousePosition);
-        
-        // Plane XZ
-        if (_planeXZ.Raycast(_mouseRay, out float distanceXZ))
-        {
-            Vector3 intersectXZ = _mouseRay.GetPoint(distanceXZ);
-            Vector3 posToIntersect = intersectXZ - position;
-            
-            Vector3 xProjection = new Vector3(Vector3.Dot(posToIntersect, Vector3.right), 0f, 0f);
-            Vector3 zProjection = new Vector3(0f, 0f,  Vector3.Dot(posToIntersect, Vector3.forward));
+        Plane planeXZ = new Plane(position, xPoint, zPoint);
+        Plane planeXY = new Plane(position, xPoint, yPoint);
 
-            if ((xProjection - posToIntersect).magnitude < 0.1f && posToIntersect.magnitude <= GUIRenderer.Instance.HandlesLength && Mathf.Sign(posToIntersect.x) >= 0)
-            {
-                OnHoverAxisIn();
-                Draw.ingame.Circle(intersectXZ, Vector3.up, 0.3f, Color.yellow);
-            }
-            else
-            {
-                OnHoverAxisOut();
-            }
-            
-            Draw.ingame.Circle(intersectXZ, Vector3.up, 0.2f, Color.red);
-            Draw.ingame.Line(position, intersectXZ, Color.red);
-            
-            Draw.ingame.Circle(position + xProjection, Vector3.up, 0.1f, Color.red);
-            Draw.ingame.Circle(position + zProjection, Vector3.up, 0.1f, Color.blue);
-            
-            Draw.ingame.Line(xProjection + position , posToIntersect + position, Color.white);
-            Draw.ingame.Line(zProjection + position, posToIntersect + position, Color.white);
+        Ray mouseRay = _camera.ScreenPointToRay(Input.mousePosition);
+
+        Vector3 intersectXZ = IntersectPlaneWithRay(planeXZ, mouseRay);
+        Vector3 intersectXY = IntersectPlaneWithRay(planeXY, mouseRay);
+        Vector3 relativeXZ = intersectXZ - position;
+        Vector3 relativeXY = intersectXY - position;
+        
+        xProjection = new Vector3(Vector3.Dot(intersectXZ - position, Vector3.right), 0f, 0f);
+        zProjection = new Vector3(0f, 0f, Vector3.Dot(intersectXZ - position, Vector3.forward));
+        yProjection = new Vector3(0f, Vector3.Dot(intersectXY - position, Vector3.up), 0f);
+
+        if ((xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandlesLength && Mathf.Sign(relativeXZ.x) >= 0)
+        {
+            return Axis.X;
         }
+        if ((zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandlesLength && Mathf.Sign(relativeXZ.z) >= 0)
+        {
+            return Axis.Z;
+        }
+        if ((yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandlesLength && Mathf.Sign(relativeXY.z) >= 0)
+        {
+            return Axis.Y;
+        }
+        return Axis.None;
+    }
+    
+    private Vector3 IntersectPlaneWithRay(Plane plane, Ray ray)
+    {
+        Vector3 intersectionPoint;
+        if (!plane.Raycast(ray, out float distance)) return Vector3.zero;
+        intersectionPoint = ray.GetPoint(distance);
+        return intersectionPoint;
     }
 
     private void OnHoverAxisIn()
     {
-        _hoveredAxis = Axis.X;
+        HoveredAxis = Axis.X;
     }
 
     private void OnHoverAxisOut()
     { 
-        _hoveredAxis = Axis.None;
+        HoveredAxis = Axis.None;
     }
     
     private void Awake()
     {
+        #region Singleton
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
+        #endregion
+        
         if (Camera.main == null) { return; }
 
-        _hoveredAxis = Axis.None;
+        HoveredAxis = Axis.None;
         _camera = Camera.main;
+    }
+
+    private void Start()
+    {
+        _editorController = EditorController.Instance;
     }
 }

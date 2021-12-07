@@ -5,6 +5,7 @@ public class GUIRenderer : MonoBehaviour
 {
     public static GUIRenderer Instance;
     private GUIListedLabel _guiGraphLabel;
+    private GUIListedLabel _guiMouseLabel;
     [SerializeField] public float HandlesLength;
     [SerializeField] private float _arrowheadSize;
     void OnGUI()
@@ -12,6 +13,11 @@ public class GUIRenderer : MonoBehaviour
         _guiGraphLabel.Items["Vertices"].Value = GraphMesh.Instance.Graph.Order.ToString();
         _guiGraphLabel.Items["Edges"].Value = GraphMesh.Instance.Graph.Size.ToString();
         _guiGraphLabel.Draw();
+
+        _guiMouseLabel.Items["Grabbing"].Value = MouseController.Instance.Grabbing.ToString();
+        _guiMouseLabel.Items["GrabbedAxis"].Value = MouseController.Instance.GrabbedAxis.ToString();
+        _guiMouseLabel.Items["HoveredAxis"].Value = MouseController.Instance.HoveredAxis.ToString();
+        _guiMouseLabel.Draw();
         
         DrawHandles();
     }
@@ -22,6 +28,12 @@ public class GUIRenderer : MonoBehaviour
         _guiGraphLabel = new GUIListedLabel(new Vector2(20, 20), "Custom Mesh");
         _guiGraphLabel.CreateItem("Vertices");
         _guiGraphLabel.CreateItem("Edges");
+        
+        // Mouse GUI
+        _guiMouseLabel = new GUIListedLabel(new Vector2(20, 100), "Mouse State");
+        _guiMouseLabel.CreateItem("Grabbing");
+        _guiMouseLabel.CreateItem("GrabbedAxis");
+        _guiMouseLabel.CreateItem("HoveredAxis");
     }
 
     public void DrawHandles()

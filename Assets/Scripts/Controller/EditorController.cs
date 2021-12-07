@@ -5,9 +5,14 @@ public class EditorController : MonoBehaviour
 {
     public static EditorController Instance;
     public List<Vertex> SelectedVertices;
+
+    public bool SelectedVertex()
+    {
+        return SelectedVertices.Count != 0;
+    }
+
     private void Awake()
     {
-        SelectedVertices = new List<Vertex>();
         #region Singleton
         if (Instance == null)
         {
@@ -18,5 +23,7 @@ public class EditorController : MonoBehaviour
             Destroy(this);
         }
         #endregion
+        
+        SelectedVertices = new List<Vertex>();
     }
 }

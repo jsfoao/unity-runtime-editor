@@ -30,7 +30,7 @@ public class GUIListedLabel
     public void Draw()
     {
         // Draw Header
-        GUI.Label(new Rect(Position, new Vector2(500, 100)), Header);
+        GUI.Label(new Rect(Position, new Vector2(500, 100)), $"<b>{Header}</b>");
         // Draw Items
         for (int i = 0; i < Items.Count; i++)
         {
