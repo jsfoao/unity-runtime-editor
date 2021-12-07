@@ -20,7 +20,6 @@ public class GUIRenderer : MonoBehaviour
     private Color _ySelectedColor;
     private Color _zSelectedColor;
     
-    // GUI Labels
     private GUIListedLabel _guiGraphLabel;
     private GUIListedLabel _guiMouseLabel;
     
@@ -73,6 +72,7 @@ public class GUIRenderer : MonoBehaviour
         _guiGraphLabel.Items["Edges"].Value = GraphMesh.Instance.Graph.Size.ToString();
         _guiGraphLabel.Draw();
 
+        _guiMouseLabel.Items["SelectionMode"].Value = MouseController.Instance.SelectionMode.ToString();
         _guiMouseLabel.Items["Selecting"].Value = MouseController.Instance.Selecting.ToString();
         _guiMouseLabel.Items["Grabbing"].Value = MouseController.Instance.Grabbing.ToString();
         _guiMouseLabel.Items["GrabbedAxis"].Value = MouseController.Instance.GrabbedAxis.ToString();
@@ -91,6 +91,7 @@ public class GUIRenderer : MonoBehaviour
         
         // Mouse GUI
         _guiMouseLabel = new GUIListedLabel(new Vector2(20, 100), "Mouse State");
+        _guiMouseLabel.CreateItem("SelectionMode");
         _guiMouseLabel.CreateItem("Selecting");
         _guiMouseLabel.CreateItem("Grabbing");
         _guiMouseLabel.CreateItem("GrabbedAxis");

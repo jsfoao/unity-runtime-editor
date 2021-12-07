@@ -31,7 +31,5 @@ public class SelectableVertex : ISelectable
         
         Selected = false;
         vertex.Color = Color.red;
-        
-        EditorController.Instance.SelectedVertices.Remove(vertex);
     }
 }

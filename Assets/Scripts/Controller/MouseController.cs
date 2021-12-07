@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Numerics;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Plane = UnityEngine.Plane;
 using Vector3 = UnityEngine.Vector3;
@@ -6,6 +9,11 @@ using Vector3 = UnityEngine.Vector3;
 public enum Axis
 {
     None, X, Y, Z
+}
+
+public enum SelectionMode
+{
+    Singular, Multiple
 }
 
 public class MouseController : MonoBehaviour
@@ -28,7 +36,8 @@ public class MouseController : MonoBehaviour
     private EditorController _editorController;
     
     private Vector3 _dragOrigin;
-    private Vertex _selectedVertex;
+
+    public SelectionMode SelectionMode;
 
     private void Update()
     {
@@ -37,25 +46,63 @@ public class MouseController : MonoBehaviour
             HoveredAxis = HoveringAxis(_editorController.SelectedVertices[0].Position);
         }
 
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            // todo can't add edge when already has
+            if (_editorController.SelectedVertices.Count == 2)
+            {
+                GraphMesh.Instance.Graph.AddEdge(_editorController.SelectedVertices[0], _editorController.SelectedVertices[1]);
+            }
+        }
+        
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (_editorController.SelectedVertices.Count == 0) { return; }
+            Vertex newVertex = GraphMesh.Instance.Graph.AddConnectedVertex(_editorController.SelectedVertices[0], new Vertex(_editorController.SelectedVertices[0].Position));
+            _editorController.DeselectAll();
+            newVertex.Selectable.OnSelect();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            SelectionMode = SelectionMode.Multiple;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            SelectionMode = SelectionMode.Singular;
+        }
+        
         if (Input.GetMouseButtonDown(0))
         {
             if (HoveredAxis == Axis.None)
             {
                 Vertex newSelectedVertex = TrySelectVertex();
-                if (newSelectedVertex != null)
+                
+                if (SelectionMode == SelectionMode.Singular)
                 {
-                    Selecting = true;
-                    _selectedVertex?.Selectable.OnDeselect();
-                    _selectedVertex = newSelectedVertex;
-                    _selectedVertex.Selectable.OnSelect();
-                    _dragOrigin = Vector3.zero;
-                }
-                else
-                {
-                    Selecting = false;
-                    if (_selectedVertex != null)
+                    if (newSelectedVertex != null)
                     {
-                        _selectedVertex.Selectable.OnDeselect();
+                        Selecting = true;
+                        
+                        _editorController.DeselectAll();
+                        newSelectedVertex.Selectable.OnSelect();
+                        _dragOrigin = Vector3.zero;
+                    }
+                    else
+                    {
+                        Selecting = false;
+                        _editorController.DeselectAll();
+                    }
+                }
+
+                if (SelectionMode == SelectionMode.Multiple)
+                {
+                    if (newSelectedVertex != null)
+                    {
+                        Selecting = true;
+                        
+                        newSelectedVertex.Selectable.OnSelect();
+                        _dragOrigin = Vector3.zero;
                     }
                 }
             }
@@ -89,18 +136,20 @@ public class MouseController : MonoBehaviour
 
         if (Grabbing)
         {
-            Vertex vertex = EditorController.Instance.SelectedVertices[0];
-            switch (GrabbedAxis)
+            foreach (Vertex vertex in EditorController.Instance.SelectedVertices)
             {
-                case Axis.X:
-                    vertex.Position += xProjection - _dragOrigin;
-                    break;
-                case Axis.Y:
-                    vertex.Position += yProjection - _dragOrigin;
-                    break;
-                case Axis.Z:
-                    vertex.Position += zProjection - _dragOrigin;
-                    break;
+                switch (GrabbedAxis)
+                {
+                    case Axis.X:
+                        vertex.Position += xProjection - _dragOrigin;
+                        break;
+                    case Axis.Y:
+                        vertex.Position += yProjection - _dragOrigin;
+                        break;
+                    case Axis.Z:
+                        vertex.Position += zProjection - _dragOrigin;
+                        break;
+                }
             }
         }
         
@@ -190,6 +239,7 @@ public class MouseController : MonoBehaviour
 
         HoveredAxis = Axis.None;
         _camera = Camera.main;
+        SelectionMode = SelectionMode.Singular;
     }
 
     private void Start()

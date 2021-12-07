@@ -153,8 +153,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   HandleLength: 2
-  _handleDefaultWidth: 1
-  _handleSelectedWidth: 2
 --- !u!4 &748340360
 Transform:
   m_ObjectHideFlags: 0
@@ -361,6 +359,7 @@ MonoBehaviour:
   Selecting: 0
   Grabbing: 0
   GrabbedAxis: 0
+  SelectionMode: 0
 --- !u!4 &1555375964
 Transform:
   m_ObjectHideFlags: 0

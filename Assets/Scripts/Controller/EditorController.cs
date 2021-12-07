@@ -11,6 +11,15 @@ public class EditorController : MonoBehaviour
         return SelectedVertices.Count != 0;
     }
 
+    public void DeselectAll()
+    {
+        foreach (Vertex vertex in SelectedVertices)
+        {
+            vertex.Selectable.OnDeselect();
+        }
+        SelectedVertices.Clear();
+    }
+
     private void Awake()
     {
         #region Singleton
