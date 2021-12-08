@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEditor;
 using UnityEngine;
 using Plane = UnityEngine.Plane;
 using Vector3 = UnityEngine.Vector3;
@@ -24,9 +25,9 @@ public class MouseController : MonoBehaviour
     private Camera _camera;
     public Axis HoveredAxis;
 
-    private Vector3 xProjection;
-    private Vector3 yProjection;
-    private Vector3 zProjection;
+    private Vector3 _xProjection;
+    private Vector3 _yProjection;
+    private Vector3 _zProjection;
 
     private Vector3 _clickedX;
     public bool Selecting;
@@ -46,30 +47,32 @@ public class MouseController : MonoBehaviour
             HoveredAxis = HoveringAxis(_editorController.SelectedVertices[0].Position);
         }
 
+        // Join two edges
         if (Input.GetKeyDown(KeyCode.F))
         {
             // todo can't add edge when already has (EdgeChecker)
-            if (_editorController.SelectedVertices.Count == 2)
+            if (_editorController.TwoSelectedVertex())
             {
                 GraphMesh.Instance.Graph.AddEdge(_editorController.SelectedVertices[0], _editorController.SelectedVertices[1]);
             }
         }
 
+        // Delete selected edges
         if (Input.GetKeyDown(KeyCode.Delete))
         {
-            if (_editorController.SelectedVertices.Count == 0) { return; }
-            _editorController.DeselectAll();      
-            GraphMesh.Instance.Graph.RemoveVertex(_editorController.SelectedVertices[0]);
+            if (!_editorController.SelectedVertex()) { return; }
+            _editorController.RemoveSelectedVertices();
+            _editorController.DeselectAll();
         }
-        
+
+        // Add edge from edge
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (_editorController.SelectedVertices.Count == 0) { return; }
-            Vertex newVertex = GraphMesh.Instance.Graph.AddConnectedVertex(_editorController.SelectedVertices[0], new Vertex(_editorController.SelectedVertices[0].Position));
-            _editorController.DeselectAll();
-            newVertex.Selectable.OnSelect();
+            if (!_editorController.SelectedVertex()) { return; }
+            _editorController.AddVertexToSelectedVertices();
         }
         
+        // Switch between single and multiple selection mode
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             SelectionMode = SelectionMode.Multiple;
@@ -79,38 +82,35 @@ public class MouseController : MonoBehaviour
             SelectionMode = SelectionMode.Singular;
         }
         
+        // Vertex Selection
         if (Input.GetMouseButtonDown(0))
         {
             if (HoveredAxis == Axis.None)
             {
                 Vertex newSelectedVertex = TrySelectVertex();
-                
-                if (SelectionMode == SelectionMode.Singular)
+                if (newSelectedVertex == null)
                 {
-                    if (newSelectedVertex != null)
-                    {
-                        Selecting = true;
-                        
-                        _editorController.DeselectAll();
-                        newSelectedVertex.Selectable.OnSelect();
-                        _dragOrigin = Vector3.zero;
-                    }
-                    else
+                    if (SelectionMode == SelectionMode.Singular)
                     {
                         Selecting = false;
                         _editorController.DeselectAll();
                     }
+                    return;
                 }
-
-                if (SelectionMode == SelectionMode.Multiple)
+                
+                switch (SelectionMode)
                 {
-                    if (newSelectedVertex != null)
-                    {
+                    case SelectionMode.Singular:
                         Selecting = true;
-                        
+                        _editorController.DeselectAll();
                         newSelectedVertex.Selectable.OnSelect();
                         _dragOrigin = Vector3.zero;
-                    }
+                        break;
+                    case SelectionMode.Multiple:
+                        Selecting = true;
+                        newSelectedVertex.Selectable.OnSelect();
+                        _dragOrigin = Vector3.zero;
+                        break;
                 }
             }
 
@@ -120,17 +120,17 @@ public class MouseController : MonoBehaviour
                 {
                     case Axis.X:
                         GrabbedAxis = Axis.X;
-                        _dragOrigin = xProjection;
+                        _dragOrigin = _xProjection;
                         Grabbing = true;
                         break;
                     case Axis.Z:
                         GrabbedAxis = Axis.Z;
-                        _dragOrigin = zProjection;
+                        _dragOrigin = _zProjection;
                         Grabbing = true;
                         break;
                     case Axis.Y:
                         GrabbedAxis = Axis.Y;
-                        _dragOrigin = yProjection;
+                        _dragOrigin = _yProjection;
                         Grabbing = true;
                         break;
                     case Axis.None:
@@ -141,6 +141,7 @@ public class MouseController : MonoBehaviour
             }
         }
 
+        // Behaviour when grabbing
         if (Grabbing)
         {
             foreach (Vertex vertex in EditorController.Instance.SelectedVertices)
@@ -148,13 +149,13 @@ public class MouseController : MonoBehaviour
                 switch (GrabbedAxis)
                 {
                     case Axis.X:
-                        vertex.Position += xProjection - _dragOrigin;
+                        vertex.Position += _xProjection - _dragOrigin;
                         break;
                     case Axis.Y:
-                        vertex.Position += yProjection - _dragOrigin;
+                        vertex.Position += _yProjection - _dragOrigin;
                         break;
                     case Axis.Z:
-                        vertex.Position += zProjection - _dragOrigin;
+                        vertex.Position += _zProjection - _dragOrigin;
                         break;
                 }
             }
@@ -202,19 +203,19 @@ public class MouseController : MonoBehaviour
         Vector3 relativeXZ = intersectXZ - position;
         Vector3 relativeXY = intersectXY - position;
         
-        xProjection = new Vector3(Vector3.Dot(intersectXZ - position, Vector3.right), 0f, 0f);
-        zProjection = new Vector3(0f, 0f, Vector3.Dot(intersectXZ - position, Vector3.forward));
-        yProjection = new Vector3(0f, Vector3.Dot(intersectXY - position, Vector3.up), 0f);
+        _xProjection = new Vector3(Vector3.Dot(intersectXZ - position, Vector3.right), 0f, 0f);
+        _zProjection = new Vector3(0f, 0f, Vector3.Dot(intersectXZ - position, Vector3.forward));
+        _yProjection = new Vector3(0f, Vector3.Dot(intersectXY - position, Vector3.up), 0f);
 
-        if ((xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.x) >= 0)
+        if ((_xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.x) >= 0)
         {
             return Axis.X;
         }
-        if ((zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.z) >= 0)
+        if ((_zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.z) >= 0)
         {
             return Axis.Z;
         }
-        if ((yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXY.y) >= 0)
+        if ((_yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXY.y) >= 0)
         {
             return Axis.Y;
         }

@@ -11,6 +11,7 @@ public class GraphMesh : MonoBehaviour
     private GUIListedLabel _guiMesh;
     private GUIListedLabel _guiVertex;
 
+    // todo GO graphs
     public void RemoveVertex()
     {
         

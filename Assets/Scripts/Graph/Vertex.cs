@@ -20,6 +20,7 @@ public class Vertex
 
         Selectable = new SelectableVertex(this);
     }
+    
     public Edge AddEdge(Vertex target)
     {
         Edge edge = new Edge(this, target);
@@ -31,17 +32,21 @@ public class Vertex
     {
         foreach (Edge edge in Edges)
         {
-            if (edge.Destination != target) continue;
-            Edges.Remove(edge);
-            return;
+            if (edge.Destination == target)
+            {
+                Edges.Remove(edge);
+                return;
+            }
         }
     }
 
-    public void RemoveAllEdges()
+    public List<Vertex> GetConnectedVertices()
     {
+        List<Vertex> connectedVertices = new List<Vertex>();
         foreach (Edge edge in Edges)
         {
-            edge.Source.RemoveEdge(this);
+            connectedVertices.Add(edge.Destination);
         }
+        return connectedVertices;
     }
 }

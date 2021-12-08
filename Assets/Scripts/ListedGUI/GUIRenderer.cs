@@ -90,6 +90,7 @@ public class GUIRenderer : MonoBehaviour
         _guiMouseLabel.Items["Grabbing"].Value = MouseController.Instance.Grabbing.ToString();
         _guiMouseLabel.Items["GrabbedAxis"].Value = MouseController.Instance.GrabbedAxis.ToString();
         _guiMouseLabel.Items["HoveredAxis"].Value = MouseController.Instance.HoveredAxis.ToString();
+        _guiMouseLabel.Items["SelectedVertices"].Value = EditorController.Instance.SelectedVertices.Count.ToString();
         _guiMouseLabel.Draw();
         
         HandleAxisRendering();
@@ -106,6 +107,7 @@ public class GUIRenderer : MonoBehaviour
         _guiVertexLabel = new GUIListedLabel(new Vector2(20, 100), "Selected Vertex");
         _guiVertexLabel.CreateItem("Position");
         _guiVertexLabel.CreateItem("EdgesCount");
+        
         // Mouse GUI
         _guiMouseLabel = new GUIListedLabel(new Vector2(20, 500), "Mouse State");
         _guiMouseLabel.CreateItem("SelectionMode");
@@ -113,6 +115,7 @@ public class GUIRenderer : MonoBehaviour
         _guiMouseLabel.CreateItem("Grabbing");
         _guiMouseLabel.CreateItem("GrabbedAxis");
         _guiMouseLabel.CreateItem("HoveredAxis");
+        _guiMouseLabel.CreateItem("SelectedVertices");
     }
     
     private void Awake()

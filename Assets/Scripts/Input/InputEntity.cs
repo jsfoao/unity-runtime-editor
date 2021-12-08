@@ -42,28 +42,3 @@ public class InputEntity : MonoBehaviour
         }
     }
 }
-
-// [CustomEditor(typeof(InputEntity))]
-// public class InputEditor : Editor
-// {
-//     private InputEntity _inputEntity;
-//     private void OnEnable()
-//     {
-//         _inputEntity = (InputEntity)target;
-//     }
-//
-//     public override void OnInspectorGUI()
-//     {
-//         base.OnInspectorGUI();
-//         GUILayout.BeginHorizontal();
-//         if (GUILayout.Button("+"))
-//         {
-//             Command command = new Command(_inputEntity.CommandHandler);
-//             _inputEntity.AddControl(KeyCode.W, command);
-//         }
-//         if (GUILayout.Button("-"))
-//         {
-//         }
-//         GUILayout.EndHorizontal();
-//     }
-// }
