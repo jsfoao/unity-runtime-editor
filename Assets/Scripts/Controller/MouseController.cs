@@ -48,7 +48,7 @@ public class MouseController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.F))
         {
-            // todo can't add edge when already has
+            // todo can't add edge when already has (EdgeChecker)
             if (_editorController.SelectedVertices.Count == 2)
             {
                 GraphMesh.Instance.Graph.AddEdge(_editorController.SelectedVertices[0], _editorController.SelectedVertices[1]);
