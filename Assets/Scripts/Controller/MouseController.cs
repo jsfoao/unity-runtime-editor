@@ -54,6 +54,13 @@ public class MouseController : MonoBehaviour
                 GraphMesh.Instance.Graph.AddEdge(_editorController.SelectedVertices[0], _editorController.SelectedVertices[1]);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            if (_editorController.SelectedVertices.Count == 0) { return; }
+            _editorController.DeselectAll();      
+            GraphMesh.Instance.Graph.RemoveVertex(_editorController.SelectedVertices[0]);
+        }
         
         if (Input.GetKeyDown(KeyCode.E))
         {

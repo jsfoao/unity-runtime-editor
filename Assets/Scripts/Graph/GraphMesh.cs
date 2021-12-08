@@ -11,6 +11,26 @@ public class GraphMesh : MonoBehaviour
     private GUIListedLabel _guiMesh;
     private GUIListedLabel _guiVertex;
 
+    public void RemoveVertex()
+    {
+        
+    }
+    
+    public void AddVertex()
+    {
+        
+    }
+    
+    public void AddEdge()
+    {
+        
+    }
+    
+    public void AddConnectedVertex()
+    {
+        
+    }
+    
     private void Awake()
     {
         #region Singleton
@@ -30,20 +50,5 @@ public class GraphMesh : MonoBehaviour
         Vertex v3 = Graph.AddConnectedVertex(v1, new Vertex(new Vector3(0, 0, 10)));
         Vertex v4 = Graph.AddConnectedVertex(v3, new Vertex(new Vector3(10, 0, 10)));
         Graph.AddEdge(v2, v4);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            int index = Random.Range(0, Graph.Vertices.Length);
-            Vertex vertex = Graph.Vertices[index];
-            Vector3 position = new Vector3(
-                Random.Range(vertex.Position.x - 5, vertex.Position.x + 5),
-                Random.Range(vertex.Position.y - 5, vertex.Position.y + 5),
-                Random.Range(vertex.Position.z - 5, vertex.Position.z + 5)
-                );
-            Graph.AddConnectedVertex(vertex, new Vertex(position));
-        }
     }
 }

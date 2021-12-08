@@ -26,4 +26,22 @@ public class Vertex
         Edges.Add(edge);
         return edge;
     }
+
+    public void RemoveEdge(Vertex target)
+    {
+        foreach (Edge edge in Edges)
+        {
+            if (edge.Destination != target) continue;
+            Edges.Remove(edge);
+            return;
+        }
+    }
+
+    public void RemoveAllEdges()
+    {
+        foreach (Edge edge in Edges)
+        {
+            edge.Source.RemoveEdge(this);
+        }
+    }
 }
