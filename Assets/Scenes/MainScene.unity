@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbea31db241c42642b086f27bc8215aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HandleLength: 2
+  HandleLength: 2.5
 --- !u!4 &748340360
 Transform:
   m_ObjectHideFlags: 0
@@ -334,6 +334,7 @@ GameObject:
   - component: {fileID: 1555375964}
   - component: {fileID: 1555375963}
   - component: {fileID: 1555375965}
+  - component: {fileID: 1555375966}
   m_Layer: 0
   m_Name: EditorController
   m_TagString: Untagged
@@ -353,13 +354,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0279c8d3990310e43825cb23b7a76759, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1
+  range: 0.25
   handleSensitivity: 0.5
   HoveredAxis: 0
-  Selecting: 0
-  Grabbing: 0
   GrabbedAxis: 0
   SelectionMode: 0
+  GrabState: 0
+  SelectionState: 0
 --- !u!4 &1555375964
 Transform:
   m_ObjectHideFlags: 0
@@ -387,6 +388,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SelectedVertices: []
+--- !u!114 &1555375966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555375962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea60221c9b5e6074cacb78f90401c9b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2077559287
 GameObject:
   m_ObjectHideFlags: 0

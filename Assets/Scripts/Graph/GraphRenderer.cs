@@ -25,6 +25,11 @@ public class GraphRenderer : MonoBehaviour, IRenderer
             if (vertex.Edges.Count == 0) { continue; }
             foreach (Edge edge in vertex.Edges)
             {
+                if (edge.Source.Position == edge.Destination.Position)
+                {
+                    continue;
+                }
+                
                 Draw.ingame.WireCylinder(
                     edge.Source.Position, 
                     edge.Destination.Position, 

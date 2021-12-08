@@ -21,6 +21,7 @@ public class GUIRenderer : MonoBehaviour
     private Color _zSelectedColor;
     
     private GUIListedLabel _guiGraphLabel;
+    private GUIListedLabel _guiVertexLabel;
     private GUIListedLabel _guiMouseLabel;
     
     private void HandleAxisRendering()
@@ -72,11 +73,24 @@ public class GUIRenderer : MonoBehaviour
         _guiGraphLabel.Items["Edges"].Value = GraphMesh.Instance.Graph.Size.ToString();
         _guiGraphLabel.Draw();
 
+        if (EditorController.Instance.SelectedVertices.Count != 0)
+        {
+            _guiVertexLabel.Items["Position"].Value = EditorController.Instance.SelectedVertices[0].Position.ToString();
+            _guiVertexLabel.Items["EdgesCount"].Value = EditorController.Instance.SelectedVertices[0].Edges.Count.ToString();   
+        }
+        else
+        {
+            _guiVertexLabel.Items["Position"].Value = "None";
+            _guiVertexLabel.Items["EdgesCount"].Value = "None";
+        }
+        _guiVertexLabel.Draw();
+
         _guiMouseLabel.Items["SelectionMode"].Value = MouseController.Instance.SelectionMode.ToString();
-        _guiMouseLabel.Items["Selecting"].Value = MouseController.Instance.Selecting.ToString();
-        _guiMouseLabel.Items["Grabbing"].Value = MouseController.Instance.Grabbing.ToString();
+        _guiMouseLabel.Items["GrabState"].Value = MouseController.Instance.GrabState.ToString();
+        _guiMouseLabel.Items["SelectionState"].Value = MouseController.Instance.SelectionState.ToString();
         _guiMouseLabel.Items["GrabbedAxis"].Value = MouseController.Instance.GrabbedAxis.ToString();
         _guiMouseLabel.Items["HoveredAxis"].Value = MouseController.Instance.HoveredAxis.ToString();
+        _guiMouseLabel.Items["SelectedVertices"].Value = EditorController.Instance.SelectedVertices.Count.ToString();
         _guiMouseLabel.Draw();
         
         HandleAxisRendering();
@@ -89,13 +103,19 @@ public class GUIRenderer : MonoBehaviour
         _guiGraphLabel.CreateItem("Vertices");
         _guiGraphLabel.CreateItem("Edges");
         
+        // Selected Vertex GUI
+        _guiVertexLabel = new GUIListedLabel(new Vector2(20, 100), "Selected Vertex");
+        _guiVertexLabel.CreateItem("Position");
+        _guiVertexLabel.CreateItem("EdgesCount");
+        
         // Mouse GUI
-        _guiMouseLabel = new GUIListedLabel(new Vector2(20, 100), "Mouse State");
+        _guiMouseLabel = new GUIListedLabel(new Vector2(20, 500), "Mouse State");
         _guiMouseLabel.CreateItem("SelectionMode");
-        _guiMouseLabel.CreateItem("Selecting");
-        _guiMouseLabel.CreateItem("Grabbing");
+        _guiMouseLabel.CreateItem("GrabState");
+        _guiMouseLabel.CreateItem("SelectionState");
         _guiMouseLabel.CreateItem("GrabbedAxis");
         _guiMouseLabel.CreateItem("HoveredAxis");
+        _guiMouseLabel.CreateItem("SelectedVertices");
     }
     
     private void Awake()

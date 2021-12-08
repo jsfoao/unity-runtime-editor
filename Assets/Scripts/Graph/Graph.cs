@@ -22,10 +22,30 @@ public class Graph
         return vertex;
     }
 
+    public void RemoveVertex(Vertex vertex)
+    {
+        RemoveAllEdges(vertex);
+        vertices.Remove(vertex);
+    }
+
     public void AddEdge(Vertex v1, Vertex v2)
     {
         edges.Add(v1.AddEdge(v2));
         edges.Add(v2.AddEdge(v1));
+    }
+
+    public void RemoveEdge(Vertex v1, Vertex v2)
+    {
+        v1.RemoveEdge(v2);
+        v2.RemoveEdge(v1);
+    }
+
+    public void RemoveAllEdges(Vertex vertex)
+    {
+        foreach (Vertex connectedVertex in vertex.GetConnectedVertices())
+        {
+            RemoveEdge(vertex, connectedVertex);
+        }
     }
 
     public Vertex AddConnectedVertex(Vertex v1, Vertex v2)
