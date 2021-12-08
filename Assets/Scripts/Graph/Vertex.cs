@@ -49,4 +49,9 @@ public class Vertex
         }
         return connectedVertices;
     }
+
+    public void MoveTo(Vector3 position)
+    {
+        Position = position;
+    }
 }

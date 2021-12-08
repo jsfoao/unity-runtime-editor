@@ -1,44 +1,32 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InputEntity : MonoBehaviour
 {
+    public static InputEntity Instance;
     public CommandHandler CommandHandler;
-    [NonSerialized]public List<Control> Controls;
-    [SerializeField] private List<Control> TempControls;
 
-    public void Undo()
-    {
-        CommandHandler.Undo();
-    }
-    
-    public Control AddControl(KeyCode keyCode, Command command)
-    {
-        Control control = new Control(keyCode, command);
-        control.Command.CommandHandler = CommandHandler;
-        Controls.Add(control);
-        return control;
-    }
-    
     private void Update()
     {
-        foreach (Control control in Controls)
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            if (Input.GetKeyDown(control.KeyCode))
-            {
-                control.Command.Execute();
-            }
+            CommandHandler.Undo();
         }
+        // Debug.Log(CommandHandler.CommandStack.Count);
     }
 
     private void Awake()
     {
-        Controls = new List<Control>();
-        CommandHandler = new CommandHandler();
-        foreach (Control control in TempControls)
+        #region Singleton
+        if (Instance == null)
         {
-            AddControl(control.KeyCode, control.Command);
+            Instance = this;
         }
+        else
+        {
+            Destroy(this);
+        }
+        #endregion
+        
+        CommandHandler = new CommandHandler();
     }
 }

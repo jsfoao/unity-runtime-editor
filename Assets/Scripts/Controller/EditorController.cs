@@ -18,6 +18,7 @@ public class EditorController : MonoBehaviour
 
     public void RemoveSelectedVertices()
     {
+        InputEntity.Instance.CommandHandler.ExecuteCommand(new CreationCommand(SelectedVertices[0]));
         foreach (Vertex vertex in SelectedVertices)
         {
             GraphMesh.Instance.Graph.RemoveVertex(vertex);
@@ -39,7 +40,14 @@ public class EditorController : MonoBehaviour
             vertex.Selectable.OnSelect();
         }
     }
-    
+
+    public void SelectAll()
+    {
+        foreach (Vertex vertex in GraphMesh.Instance.Graph.Vertices)
+        {
+            vertex.Selectable.OnSelect();
+        }
+    }
     public void DeselectAll()
     {
         foreach (Vertex vertex in SelectedVertices)

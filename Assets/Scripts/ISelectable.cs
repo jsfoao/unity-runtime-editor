@@ -21,7 +21,8 @@ public class SelectableVertex : ISelectable
     {
         Selected = true;
         vertex.Color = Color.yellow;
-        
+
+        if (EditorController.Instance.SelectedVertices.Contains(vertex)) { return; }
         EditorController.Instance.SelectedVertices.Add(vertex);
     }
 

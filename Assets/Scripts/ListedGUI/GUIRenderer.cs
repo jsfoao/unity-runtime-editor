@@ -86,8 +86,8 @@ public class GUIRenderer : MonoBehaviour
         _guiVertexLabel.Draw();
 
         _guiMouseLabel.Items["SelectionMode"].Value = MouseController.Instance.SelectionMode.ToString();
-        _guiMouseLabel.Items["Selecting"].Value = MouseController.Instance.Selecting.ToString();
-        _guiMouseLabel.Items["Grabbing"].Value = MouseController.Instance.Grabbing.ToString();
+        _guiMouseLabel.Items["GrabState"].Value = MouseController.Instance.GrabState.ToString();
+        _guiMouseLabel.Items["SelectionState"].Value = MouseController.Instance.SelectionState.ToString();
         _guiMouseLabel.Items["GrabbedAxis"].Value = MouseController.Instance.GrabbedAxis.ToString();
         _guiMouseLabel.Items["HoveredAxis"].Value = MouseController.Instance.HoveredAxis.ToString();
         _guiMouseLabel.Items["SelectedVertices"].Value = EditorController.Instance.SelectedVertices.Count.ToString();
@@ -111,8 +111,8 @@ public class GUIRenderer : MonoBehaviour
         // Mouse GUI
         _guiMouseLabel = new GUIListedLabel(new Vector2(20, 500), "Mouse State");
         _guiMouseLabel.CreateItem("SelectionMode");
-        _guiMouseLabel.CreateItem("Selecting");
-        _guiMouseLabel.CreateItem("Grabbing");
+        _guiMouseLabel.CreateItem("GrabState");
+        _guiMouseLabel.CreateItem("SelectionState");
         _guiMouseLabel.CreateItem("GrabbedAxis");
         _guiMouseLabel.CreateItem("HoveredAxis");
         _guiMouseLabel.CreateItem("SelectedVertices");

@@ -354,13 +354,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0279c8d3990310e43825cb23b7a76759, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1
+  range: 0.25
   handleSensitivity: 0.5
   HoveredAxis: 0
-  Selecting: 0
-  Grabbing: 0
   GrabbedAxis: 0
   SelectionMode: 0
+  GrabState: 0
+  SelectionState: 0
 --- !u!4 &1555375964
 Transform:
   m_ObjectHideFlags: 0
@@ -400,7 +400,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea60221c9b5e6074cacb78f90401c9b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TempControls: []
 --- !u!1 &2077559287
 GameObject:
   m_ObjectHideFlags: 0
