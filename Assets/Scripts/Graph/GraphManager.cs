@@ -1,12 +1,13 @@
+using System;
 using UnityEngine;
 
-public class GraphMesh : MonoBehaviour
+public class GraphManager : MonoBehaviour
 {
-    public static GraphMesh Instance;
+    public static GraphManager Instance;
     public Graph Graph;
     private GUIListedLabel _guiMesh;
     private GUIListedLabel _guiVertex;
-    
+
     private void Awake()
     {
         #region Singleton

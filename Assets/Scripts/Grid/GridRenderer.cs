@@ -1,7 +1,7 @@
 using Drawing;
 using UnityEngine;
 
-public class GridRenderer : MonoBehaviour, IRenderer
+public class GridRenderer : MonoBehaviour
 {
     private EditorGrid _gridInstance;
     public static GridRenderer Instance;

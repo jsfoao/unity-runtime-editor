@@ -70,8 +70,8 @@ public class GUIRenderer : MonoBehaviour
     
     void OnGUI()
     {
-        _guiGraphLabel.Items["Vertices"].Value = GraphMesh.Instance.Graph.Order.ToString();
-        _guiGraphLabel.Items["Edges(Broken)"].Value = GraphMesh.Instance.Graph.Size.ToString();
+        _guiGraphLabel.Items["Vertices"].Value = GraphManager.Instance.Graph.Order.ToString();
+        _guiGraphLabel.Items["Edges(Broken)"].Value = GraphManager.Instance.Graph.Size.ToString();
         _guiGraphLabel.Draw();
 
         if (EditorController.Instance.SelectedVertices.Count != 0)
@@ -94,10 +94,10 @@ public class GUIRenderer : MonoBehaviour
         _guiMouseLabel.Items["SelectedVertices"].Value = EditorController.Instance.SelectedVertices.Count.ToString();
         _guiMouseLabel.Draw();
 
-        if (InputEntity.Instance.CommandHandler.CommandStack.Count != 0)
+        if (InputHandler.Instance.CommandHandler.CommandStack.Count != 0)
         {
-            _guiCommandLabel.Items["LastCommand"].Value = InputEntity.Instance.CommandHandler.LastCommand().Type.ToString();
-            _guiCommandLabel.Items["StackCount"].Value = InputEntity.Instance.CommandHandler.CommandStack.Count.ToString();
+            _guiCommandLabel.Items["LastCommand"].Value = InputHandler.Instance.CommandHandler.LastCommand().Type.ToString();
+            _guiCommandLabel.Items["StackCount"].Value = InputHandler.Instance.CommandHandler.CommandStack.Count.ToString();
         }
         else
         {

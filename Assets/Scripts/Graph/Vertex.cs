@@ -7,17 +7,16 @@ public class Vertex
     public Vector3 Position;
     public HashSet<Edge> Edges;
     
-    [NonSerialized] public Color Color;
-
     public SelectableVertex Selectable;
+    public VertexRenderer Renderer;
 
     public Vertex(Vector3 position)
     {
         Position = position;
         Edges = new HashSet<Edge>();
-        Color = Color.red;
 
         Selectable = new SelectableVertex(this);
+        Renderer = new VertexRenderer(this);
     }
     
     public Edge AddEdge(Vertex target)

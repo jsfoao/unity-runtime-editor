@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IRenderer
+public abstract class IRenderer
 {
-    public void Render(Vector3 position); 
+    public abstract void Render();
 }

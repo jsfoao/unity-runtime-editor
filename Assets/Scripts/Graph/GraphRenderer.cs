@@ -1,55 +1,41 @@
-using Drawing;
 using UnityEngine;
 
-[RequireComponent(typeof(GraphMesh))]
-public class GraphRenderer : MonoBehaviour, IRenderer
+public class GraphRenderer : IRenderer
 {
-    private GraphMesh _graphMesh;
+    private Graph _graph;
 
-    public void RenderVertices()
+    public GraphRenderer(Graph graph)
     {
-        if (_graphMesh.Graph.Vertices.Length == 0) { return; }
-        foreach (Vertex vertex in _graphMesh.Graph.Vertices)
-        {
-            Draw.ingame.WireSphere(
-                vertex.Position, 
-                .2f,
-                vertex.Color);
-        }  
+        _graph = graph;
     }
-
-    public void RenderEdges()
+    public override void Render()
     {
-        foreach (Vertex vertex in _graphMesh.Graph.Vertices)
+        foreach (Vertex vertex in _graph.Vertices)
         {
-            if (vertex.Edges.Count == 0) { continue; }
+            vertex.Renderer.Render();
             foreach (Edge edge in vertex.Edges)
             {
-                if (edge.Source.Position == edge.Destination.Position)
-                {
-                    continue;
-                }
-                
-                Draw.ingame.WireCylinder(
-                    edge.Source.Position, 
-                    edge.Destination.Position, 
-                    .1f, Color.white);
+                edge.Renderer.Render();
             }
         }
     }
-    public void Render(Vector3 position)
+
+    public void SetVerticesColor(Color color)
     {
-        RenderVertices();
-        RenderEdges();
+        foreach (Vertex vertex in _graph.Vertices)
+        {
+            vertex.Renderer.SetColor(color);
+        }
     }
     
-    private void Update()
+    public void SetEdgesColor(Color color)
     {
-        Render(Vector3.zero);
-    }
-
-    private void Awake()
-    {
-        _graphMesh = GetComponent<GraphMesh>();
+        foreach (Vertex vertex in _graph.Vertices)
+        {
+            foreach (Edge edge in vertex.Edges)
+            {
+                edge.Renderer.SetColor(color);
+            }
+        }
     }
 }

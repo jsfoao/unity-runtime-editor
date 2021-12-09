@@ -1,11 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public enum CommandType
 {
     None, Position, Create, Delete
 }
-// TODO Undo System: Commands Example
+
+public enum BehaviourType
+{
+    KeyDown, KeyUp, Hold
+}
+
+[Serializable]
+public class Control
+{
+    public KeyCode Key;
+    public BehaviourType Behaviour;
+    public UnityEvent Event;
+
+    public Control(KeyCode key, BehaviourType behaviourType = BehaviourType.KeyDown)
+    {
+        Key = key;
+        Event = new UnityEvent();
+        Behaviour = behaviourType;
+    }
+
+    public void AddAction(UnityAction call)
+    {
+        Event.AddListener(call);
+    }
+}
 public class Command
 {
     public CommandType Type;
@@ -67,10 +93,10 @@ public class DeleteVertexCommand : Command
 
     public override void Undo()
     {
-        Vertex oldVertex = GraphMesh.Instance.Graph.AddVertex(_vertex);
+        Vertex oldVertex = GraphManager.Instance.Graph.AddVertex(_vertex);
         foreach (Vertex vertex in _connectedVertices)
         {
-            GraphMesh.Instance.Graph.AddEdge(vertex, oldVertex);
+            GraphManager.Instance.Graph.AddEdge(vertex, oldVertex);
         }
     }
 }
@@ -94,7 +120,7 @@ public class CreateVertexCommand : Command
     {
         foreach (Vertex vertex in _vertices)
         {
-            GraphMesh.Instance.Graph.RemoveVertex(vertex);
+            GraphManager.Instance.Graph.RemoveVertex(vertex);
         }
     }
 }

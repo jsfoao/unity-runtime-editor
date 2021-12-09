@@ -1,19 +1,23 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Graph
 {
+    
     private List<Vertex> vertices;
     private HashSet<Edge> edges;
     
     public int Order => vertices.Count;
     public int Size => edges.Count;
 
+    public GraphRenderer Renderer;
     public Vertex[] Vertices => vertices.ToArray();
 
     public Graph()
     {
         vertices = new List<Vertex>();
         edges = new HashSet<Edge>();
+        Renderer = new GraphRenderer(this);
     }
         
     public Vertex AddVertex(Vertex vertex)
@@ -60,6 +64,8 @@ public class Edge
 {
     private Vertex source;
     private Vertex destination;
+
+    public EdgeRenderer Renderer;
     
     public Vertex Source => source;
     public Vertex Destination => destination;
@@ -68,5 +74,7 @@ public class Edge
     {
         this.source = source;
         this.destination = destination;
+
+        Renderer = new EdgeRenderer(this);
     }
 }

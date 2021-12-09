@@ -11,30 +11,35 @@ public class EditorController : MonoBehaviour
         return SelectedVertices.Count != 0;
     }
 
-    public bool TwoSelectedVertex()
+    private bool TwoSelectedVertex()
     {
         return SelectedVertices.Count == 2;
     }
 
     public void RemoveSelectedVertices()
     {
-        InputEntity.Instance.CommandHandler.ExecuteCommand(new DeleteVertexCommand(SelectedVertices[0]));
+        if (!SelectedVertex()) { return; }
+        InputHandler.Instance.CommandHandler.ExecuteCommand(new DeleteVertexCommand(SelectedVertices[0]));
+        
         foreach (Vertex vertex in SelectedVertices)
         {
-            GraphMesh.Instance.Graph.RemoveVertex(vertex);
+            GraphManager.Instance.Graph.RemoveVertex(vertex);
         }
         DeselectAll();
+        MouseController.Instance.ResetStates();
     }
 
     public void AddVertexToSelectedVertices()
-    {
+    {            
+        if (!SelectedVertex()) { return; }
         List<Vertex> addedVertex = new List<Vertex>();
+        InputHandler.Instance.CommandHandler.ExecuteCommand(new CreateVertexCommand(addedVertex));
+
         foreach (Vertex vertex in SelectedVertices)
         {
-            Vertex newVertex = GraphMesh.Instance.Graph.AddConnectedVertex(vertex, new Vertex(vertex.Position));
+            Vertex newVertex = GraphManager.Instance.Graph.AddConnectedVertex(vertex, new Vertex(vertex.Position));
             addedVertex.Add(newVertex);
         }
-        InputEntity.Instance.CommandHandler.ExecuteCommand(new CreateVertexCommand(addedVertex));
 
         DeselectAll();
         foreach (Vertex vertex in addedVertex)
@@ -42,14 +47,18 @@ public class EditorController : MonoBehaviour
             vertex.Selectable.OnSelect();
         }
     }
-
+    
     public void SelectAll()
     {
-        foreach (Vertex vertex in GraphMesh.Instance.Graph.Vertices)
+        if (MouseController.Instance.SelectionMode != SelectionMode.Multiple) { return; }
+        MouseController.Instance.GrabState = GrabState.Idling;
+        
+        foreach (Vertex vertex in GraphManager.Instance.Graph.Vertices)
         {
             vertex.Selectable.OnSelect();
         }
     }
+    
     public void DeselectAll()
     {
         foreach (Vertex vertex in SelectedVertices)
@@ -59,6 +68,34 @@ public class EditorController : MonoBehaviour
         SelectedVertices.Clear();
     }
 
+    public void JoinTwoVertices()
+    {
+        if (TwoSelectedVertex())
+        {
+            GraphManager.Instance.Graph.AddEdge(SelectedVertices[0], SelectedVertices[1]);
+        }
+    }
+
+    public void SeparateTwoVertices()
+    {
+        if (!TwoSelectedVertex()) { return; }
+        GraphManager.Instance.Graph.RemoveEdge(SelectedVertices[0], SelectedVertices[1]);
+    }
+
+    public void SetSingleSelectionMode()
+    {
+        MouseController.Instance.SelectionMode = SelectionMode.Singular;
+    }
+    
+    public void SetMultipleSelectionMode()
+    {
+        MouseController.Instance.SelectionMode = SelectionMode.Multiple;
+    }
+    public void Undo()
+    {
+        InputHandler.Instance.CommandHandler.Undo();
+    }
+    
     private void Awake()
     {
         #region Singleton

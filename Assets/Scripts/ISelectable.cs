@@ -20,7 +20,7 @@ public class SelectableVertex : ISelectable
     public override void OnSelect()
     {
         Selected = true;
-        vertex.Color = Color.yellow;
+        vertex.Renderer.SetColor(Color.yellow);
 
         if (EditorController.Instance.SelectedVertices.Contains(vertex)) { return; }
         EditorController.Instance.SelectedVertices.Add(vertex);
@@ -31,6 +31,6 @@ public class SelectableVertex : ISelectable
         if (!EditorController.Instance.SelectedVertices.Contains(vertex)) { return; }
         
         Selected = false;
-        vertex.Color = Color.red;
+        vertex.Renderer.SetColor(Color.red);
     }
 }

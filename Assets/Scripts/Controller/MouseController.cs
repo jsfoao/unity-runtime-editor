@@ -29,112 +29,51 @@ public enum SelectionState
 
 public class MouseController : MonoBehaviour
 {
-    public static MouseController Instance;
-    [SerializeField] private float range = 1f;
-    [SerializeField] private float handleSensitivity = 1f;
+    public static MouseController Instance; 
+    [Tooltip("Minimum distance to vertex to select")] 
+    [SerializeField] [Range(0f, 1f)]
+    private float range;
+    [Tooltip("Minimum distance to handle to select")] 
+    [SerializeField] [Range(0f, 1f)]
+    private float handleRange;
     private Camera _camera;
-    public Axis HoveredAxis;
 
     private Vector3 _xProjection;
     private Vector3 _yProjection;
     private Vector3 _zProjection;
-
-    private Vector3 _clickedX;
-    public Axis GrabbedAxis;
-
+    
     private EditorController _editorController;
     
     private Vector3 _dragOrigin;
-
-    public SelectionMode SelectionMode;
-    public GrabState GrabState;
-    public SelectionState SelectionState;
+    
+    [NonSerialized] public Axis HoveredAxis;
+    [NonSerialized] public Axis GrabbedAxis;
+    [NonSerialized] public SelectionMode SelectionMode;
+    [NonSerialized] public GrabState GrabState;
+    [NonSerialized] public SelectionState SelectionState;
 
     private void Update()
     {
-        #region EditorInputs
-        // Undo
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            InputEntity.Instance.CommandHandler.Undo();
-        }
-        
-        // Join two vertices
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            if (_editorController.TwoSelectedVertex())
-            {
-                GraphMesh.Instance.Graph.AddEdge(_editorController.SelectedVertices[0], _editorController.SelectedVertices[1]);
-            }
-        }
-
-        // Delete selected edges
-        if (Input.GetKeyDown(KeyCode.Delete))
-        {
-            if (!_editorController.SelectedVertex()) { return; }
-            _editorController.RemoveSelectedVertices();
-            _editorController.DeselectAll();
-            ResetStates();
-        }
-
-        // Add edge from edge
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (!_editorController.SelectedVertex()) { return; }
-            _editorController.AddVertexToSelectedVertices();
-        }
-        
-        // Switch between single and multiple selection mode
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            SelectionMode = SelectionMode.Multiple;
-        }
-        if (Input.GetKeyUp(KeyCode.LeftControl))
-        {
-            SelectionMode = SelectionMode.Singular;
-        }
-
-        if (Input.GetKeyDown(KeyCode.A) && SelectionMode == SelectionMode.Multiple)
-        {
-            GrabState = GrabState.Idling;
-            _editorController.SelectAll();
-        }
-
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            if (!_editorController.TwoSelectedVertex()) { return; }
-            GraphMesh.Instance.Graph.RemoveEdge(_editorController.SelectedVertices[0], _editorController.SelectedVertices[1]);
-        }
-        #endregion
-        
         if (_editorController.SelectedVertex())
         {
-            HoveredAxis = HoveringAxis(_editorController.SelectedVertices[0].Position);
+            HoveredAxis = Geometry.HoveringAxis(_camera, _editorController.SelectedVertices[0].Position, handleRange,
+                out _xProjection, 
+                out _yProjection,
+                out _zProjection);
         }
-        
-        if (Input.GetMouseButtonDown(0))
-        {
-            OnClickDown();
-        }
-        
+
         if (GrabState == GrabState.Grabbing)
         {
             OnClickHover();
         }
-        
-        if (Input.GetMouseButtonUp(0))
-        {
-            OnClickUp();
-        }
     }
 
-    // TODO Mouse State Machine: Events example
     #region Events
-    private void OnClickDown()
+    public void OnClickDown()
     {
         if (HoveredAxis == Axis.None)
         {
-            Vertex newSelectedVertex = TrySelectVertex();
+            Vertex newSelectedVertex = Geometry.VertexIntersectMouseRay(Camera.main, range);
             if (newSelectedVertex == null)
             {
                 if (SelectionMode == SelectionMode.Singular) { OnDeselect(); }
@@ -184,7 +123,7 @@ public class MouseController : MonoBehaviour
         }
     }
 
-    private void OnClickUp()
+    public void OnClickUp()
     {
         if (GrabState == GrabState.Grabbing)
         {
@@ -234,81 +173,17 @@ public class MouseController : MonoBehaviour
         if (!_editorController.SelectedVertex()) { return; }
 
         Command recordPosition = new VertexPositionCommand(_editorController.SelectedVertices);
-        InputEntity.Instance.CommandHandler.ExecuteCommand(recordPosition);
+        InputHandler.Instance.CommandHandler.ExecuteCommand(recordPosition);
     }
 
-    private void ResetStates()
+    public void ResetStates()
     {
         SelectionState = SelectionState.Deselected;
         GrabState = GrabState.Disabled;
         HoveredAxis = Axis.None;
     }
     #endregion
-
-    #region Selection Calculations
-    private Vertex TrySelectVertex()
-    {
-        Ray mouseRay = _camera.ScreenPointToRay(Input.mousePosition);
-        Transform cameraTransform = _camera.transform;
-        foreach (Vertex vertex in GraphMesh.Instance.Graph.Vertices)
-        {
-            Plane vertexPlane = new Plane(vertex.Position, vertex.Position + cameraTransform.up, vertex.Position + cameraTransform.right);
-            
-            if (vertexPlane.Raycast(mouseRay, out float distanceMouse))
-            {
-                Vector3 intersectMouse = mouseRay.GetPoint(distanceMouse);
-                if ((intersectMouse - vertex.Position).magnitude <= range)
-                {
-                    return vertex;
-                }
-            }
-        }
-        return null;
-    }
-
-    private Axis HoveringAxis(Vector3 position)
-    {
-        Vector3 xPoint = position + Vector3.right;
-        Vector3 yPoint = position + Vector3.up;
-        Vector3 zPoint = position + Vector3.forward;
-        Plane planeXZ = new Plane(position, xPoint, zPoint);
-        Plane planeXY = new Plane(position, xPoint, yPoint);
-
-        Ray mouseRay = _camera.ScreenPointToRay(Input.mousePosition);
-
-        Vector3 intersectXZ = IntersectPlaneWithRay(planeXZ, mouseRay);
-        Vector3 intersectXY = IntersectPlaneWithRay(planeXY, mouseRay);
-        Vector3 relativeXZ = intersectXZ - position;
-        Vector3 relativeXY = intersectXY - position;
-        
-        _xProjection = new Vector3(Vector3.Dot(intersectXZ - position, Vector3.right), 0f, 0f);
-        _zProjection = new Vector3(0f, 0f, Vector3.Dot(intersectXZ - position, Vector3.forward));
-        _yProjection = new Vector3(0f, Vector3.Dot(intersectXY - position, Vector3.up), 0f);
-
-        if ((_xProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.x) >= 0)
-        {
-            return Axis.X;
-        }
-        if ((_zProjection - relativeXZ).magnitude <= handleSensitivity && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.z) >= 0)
-        {
-            return Axis.Z;
-        }
-        if ((_yProjection - relativeXY).magnitude <= handleSensitivity && relativeXY.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXY.y) >= 0)
-        {
-            return Axis.Y;
-        }
-        return Axis.None;
-    }
     
-    private Vector3 IntersectPlaneWithRay(Plane plane, Ray ray)
-    {
-        if (!plane.Raycast(ray, out float distance)) return Vector3.zero;
-        Vector3 intersectionPoint = ray.GetPoint(distance);
-        return intersectionPoint;
-    }
-    #endregion
-
-    #region Unity Methods
     private void Awake()
     {
         #region Singleton
@@ -321,20 +196,16 @@ public class MouseController : MonoBehaviour
             Destroy(this);
         }
         #endregion
-        
         if (Camera.main == null) { return; }
 
         HoveredAxis = Axis.None;
         _camera = Camera.main;
         
-        SelectionMode = SelectionMode.Singular;
-        GrabState = GrabState.Disabled;
-        SelectionState = SelectionState.Deselected;
+        ResetStates();
     }
 
     private void Start()
     {
         _editorController = EditorController.Instance;
     }
-    #endregion
 }
