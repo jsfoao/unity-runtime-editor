@@ -23,6 +23,7 @@ public class GUIRenderer : MonoBehaviour
     private GUIListedLabel _guiGraphLabel;
     private GUIListedLabel _guiVertexLabel;
     private GUIListedLabel _guiMouseLabel;
+    private GUIListedLabel _guiCommandLabel;
     
     private void HandleAxisRendering()
     {
@@ -70,7 +71,7 @@ public class GUIRenderer : MonoBehaviour
     void OnGUI()
     {
         _guiGraphLabel.Items["Vertices"].Value = GraphMesh.Instance.Graph.Order.ToString();
-        _guiGraphLabel.Items["Edges"].Value = GraphMesh.Instance.Graph.Size.ToString();
+        _guiGraphLabel.Items["Edges(Broken)"].Value = GraphMesh.Instance.Graph.Size.ToString();
         _guiGraphLabel.Draw();
 
         if (EditorController.Instance.SelectedVertices.Count != 0)
@@ -92,7 +93,19 @@ public class GUIRenderer : MonoBehaviour
         _guiMouseLabel.Items["HoveredAxis"].Value = MouseController.Instance.HoveredAxis.ToString();
         _guiMouseLabel.Items["SelectedVertices"].Value = EditorController.Instance.SelectedVertices.Count.ToString();
         _guiMouseLabel.Draw();
-        
+
+        if (InputEntity.Instance.CommandHandler.CommandStack.Count != 0)
+        {
+            _guiCommandLabel.Items["LastCommand"].Value = InputEntity.Instance.CommandHandler.LastCommand().Type.ToString();
+            _guiCommandLabel.Items["StackCount"].Value = InputEntity.Instance.CommandHandler.CommandStack.Count.ToString();
+        }
+        else
+        {
+            _guiCommandLabel.Items["LastCommand"].Value = "None";
+            _guiCommandLabel.Items["StackCount"].Value = 0.ToString();
+        }
+        _guiCommandLabel.Draw();
+
         HandleAxisRendering();
     }
     
@@ -101,7 +114,7 @@ public class GUIRenderer : MonoBehaviour
         // Mesh GUI
         _guiGraphLabel = new GUIListedLabel(new Vector2(20, 20), "Custom Mesh");
         _guiGraphLabel.CreateItem("Vertices");
-        _guiGraphLabel.CreateItem("Edges");
+        _guiGraphLabel.CreateItem("Edges(Broken)");
         
         // Selected Vertex GUI
         _guiVertexLabel = new GUIListedLabel(new Vector2(20, 100), "Selected Vertex");
@@ -109,13 +122,18 @@ public class GUIRenderer : MonoBehaviour
         _guiVertexLabel.CreateItem("EdgesCount");
         
         // Mouse GUI
-        _guiMouseLabel = new GUIListedLabel(new Vector2(20, 500), "Mouse State");
+        _guiMouseLabel = new GUIListedLabel(new Vector2(20, 600), "Mouse State");
         _guiMouseLabel.CreateItem("SelectionMode");
         _guiMouseLabel.CreateItem("GrabState");
         _guiMouseLabel.CreateItem("SelectionState");
         _guiMouseLabel.CreateItem("GrabbedAxis");
         _guiMouseLabel.CreateItem("HoveredAxis");
         _guiMouseLabel.CreateItem("SelectedVertices");
+        
+        // Commands GUI
+        _guiCommandLabel = new GUIListedLabel(new Vector2(20, 500), "Commands");
+        _guiCommandLabel.CreateItem("LastCommand");
+        _guiCommandLabel.CreateItem("StackCount");
     }
     
     private void Awake()

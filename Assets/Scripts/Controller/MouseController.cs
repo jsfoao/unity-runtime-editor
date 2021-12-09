@@ -53,10 +53,15 @@ public class MouseController : MonoBehaviour
     private void Update()
     {
         #region EditorInputs
-        // Join two edges
+        // Undo
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            InputEntity.Instance.CommandHandler.Undo();
+        }
+        
+        // Join two vertices
         if (Input.GetKeyDown(KeyCode.F))
         {
-            // todo can't add edge when already has (EdgeChecker)
             if (_editorController.TwoSelectedVertex())
             {
                 GraphMesh.Instance.Graph.AddEdge(_editorController.SelectedVertices[0], _editorController.SelectedVertices[1]);
@@ -91,6 +96,7 @@ public class MouseController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.A) && SelectionMode == SelectionMode.Multiple)
         {
+            GrabState = GrabState.Idling;
             _editorController.SelectAll();
         }
 
@@ -106,92 +112,114 @@ public class MouseController : MonoBehaviour
             HoveredAxis = HoveringAxis(_editorController.SelectedVertices[0].Position);
         }
         
-        // Vertex Selection
         if (Input.GetMouseButtonDown(0))
         {
-            if (HoveredAxis == Axis.None)
-            {
-                Vertex newSelectedVertex = TrySelectVertex();
-                if (newSelectedVertex == null)
-                {
-                    if (SelectionMode == SelectionMode.Singular) { OnDeselect(); }
-                    return;
-                }
-                
-                switch (SelectionMode)
-                {
-                    case SelectionMode.Singular:
-                        OnSelect(newSelectedVertex, false);
-                        break;
-                    case SelectionMode.Multiple:
-                        OnSelect(newSelectedVertex, true);
-                        break;
-                }
-            }
-
-            if (GrabState == GrabState.Idling)
-            {
-                switch (HoveredAxis)
-                {
-                    case Axis.X:
-                        GrabbedAxis = Axis.X;
-                        _dragOrigin = _xProjection;
-                        GrabState = GrabState.Grabbing;
-                        OnGrab();
-                        break;
-                    case Axis.Z:
-                        GrabbedAxis = Axis.Z;
-                        _dragOrigin = _zProjection;
-                        GrabState = GrabState.Grabbing;
-                        OnGrab();
-                        break;
-                    case Axis.Y:
-                        GrabbedAxis = Axis.Y;
-                        _dragOrigin = _yProjection;
-                        GrabState = GrabState.Grabbing;
-                        OnGrab();
-                        break;
-                    case Axis.None:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            OnClickDown();
         }
-
-        // Behaviour when grabbing
+        
         if (GrabState == GrabState.Grabbing)
         {
-            foreach (Vertex vertex in EditorController.Instance.SelectedVertices)
-            {
-                switch (GrabbedAxis)
-                {
-                    case Axis.X:
-                        vertex.Position += _xProjection - _dragOrigin;
-                        break;
-                    case Axis.Y:
-                        vertex.Position += _yProjection - _dragOrigin;
-                        break;
-                    case Axis.Z:
-                        vertex.Position += _zProjection - _dragOrigin;
-                        break;
-                }
-            }
+            OnClickHover();
         }
         
         if (Input.GetMouseButtonUp(0))
         {
-            if (GrabState == GrabState.Grabbing) { OnDrop(); }
+            OnClickUp();
         }
     }
 
+    // TODO Mouse State Machine: Events example
+    #region Events
+    private void OnClickDown()
+    {
+        if (HoveredAxis == Axis.None)
+        {
+            Vertex newSelectedVertex = TrySelectVertex();
+            if (newSelectedVertex == null)
+            {
+                if (SelectionMode == SelectionMode.Singular) { OnDeselect(); }
+                return;
+            }
+                
+            switch (SelectionMode)
+            {
+                case SelectionMode.Singular:
+                    OnSelect(newSelectedVertex, false);
+                    GrabState = GrabState.Idling;
+                    break;
+                case SelectionMode.Multiple:
+                    OnSelect(newSelectedVertex, true);
+                    GrabState = GrabState.Idling;
+                    break;
+            }
+        }
+
+        if (GrabState == GrabState.Idling)
+        {
+            switch (HoveredAxis)
+            {
+                case Axis.X:
+                    GrabbedAxis = Axis.X;
+                    _dragOrigin = _xProjection;
+                    GrabState = GrabState.Grabbing;
+                    OnGrab();
+                    break;
+                case Axis.Z:
+                    GrabbedAxis = Axis.Z;
+                    _dragOrigin = _zProjection;
+                    GrabState = GrabState.Grabbing;
+                    OnGrab();
+                    break;
+                case Axis.Y:
+                    GrabbedAxis = Axis.Y;
+                    _dragOrigin = _yProjection;
+                    GrabState = GrabState.Grabbing;
+                    OnGrab();
+                    break;
+                case Axis.None:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+
+    private void OnClickUp()
+    {
+        if (GrabState == GrabState.Grabbing)
+        {
+            GrabbedAxis = Axis.None;
+            GrabState = GrabState.Idling;
+        }
+    }
+
+    private void OnClickHover()
+    {
+        foreach (Vertex vertex in EditorController.Instance.SelectedVertices)
+        {
+            switch (GrabbedAxis)
+            {
+                case Axis.X:
+                    vertex.Position += _xProjection - _dragOrigin;
+                    break;
+                case Axis.Y:
+                    vertex.Position += _yProjection - _dragOrigin;
+                    break;
+                case Axis.Z:
+                    vertex.Position += _zProjection - _dragOrigin;
+                    break;
+            }
+        }
+    }
+    #endregion
+
+    #region VertexSelection
     private void OnSelect(Vertex vertex, bool multiple)
     {
         if (!multiple) { _editorController.DeselectAll(); }
         vertex.Selectable.OnSelect();
         _dragOrigin = Vector3.zero;
         SelectionState = SelectionState.Selected;
-        GrabState = GrabState.Idling;
     }
 
     private void OnDeselect()
@@ -201,17 +229,12 @@ public class MouseController : MonoBehaviour
         _editorController.DeselectAll();
     }
 
-    private void OnDrop()
-    {
-        GrabbedAxis = Axis.None;
-        GrabState = GrabState.Idling;
-        
-    }
-
     private void OnGrab()
     {
         if (!_editorController.SelectedVertex()) { return; }
-        InputEntity.Instance.CommandHandler.ExecuteCommand(new MoveCommand(_editorController.SelectedVertices));
+
+        Command recordPosition = new VertexPositionCommand(_editorController.SelectedVertices);
+        InputEntity.Instance.CommandHandler.ExecuteCommand(recordPosition);
     }
 
     private void ResetStates()
@@ -220,6 +243,7 @@ public class MouseController : MonoBehaviour
         GrabState = GrabState.Disabled;
         HoveredAxis = Axis.None;
     }
+    #endregion
 
     #region Selection Calculations
     private Vertex TrySelectVertex()
@@ -284,6 +308,7 @@ public class MouseController : MonoBehaviour
     }
     #endregion
 
+    #region Unity Methods
     private void Awake()
     {
         #region Singleton
@@ -311,4 +336,5 @@ public class MouseController : MonoBehaviour
     {
         _editorController = EditorController.Instance;
     }
+    #endregion
 }

@@ -6,9 +6,7 @@ public class GraphMesh : MonoBehaviour
     public Graph Graph;
     private GUIListedLabel _guiMesh;
     private GUIListedLabel _guiVertex;
-
-    // todo GO graphs
-
+    
     private void Awake()
     {
         #region Singleton

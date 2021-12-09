@@ -7,11 +7,6 @@ public class InputEntity : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            CommandHandler.Undo();
-        }
-        // Debug.Log(CommandHandler.CommandStack.Count);
     }
 
     private void Awake()

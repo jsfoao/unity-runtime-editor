@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
+public enum CommandType
+{
+    None, Position, Create, Delete
+}
+// TODO Undo System: Commands Example
 public class Command
 {
+    public CommandType Type;
     public CommandHandler CommandHandler;
 
     public virtual void Execute() { }
@@ -11,20 +16,27 @@ public class Command
     public virtual void Undo() { }
 }
 
-public class MoveCommand : Command
+public class VertexPositionCommand : Command
 {
     private readonly Dictionary<Vertex, Vector3> _vertexPositions;
+    private readonly List<Vertex> _vertices;
 
-    public MoveCommand(List<Vertex> vertices)
+    public VertexPositionCommand(List<Vertex> vertices)
     {
+        _vertices = vertices;
         _vertexPositions = new Dictionary<Vertex, Vector3>();
-        foreach (Vertex vertex in vertices)
+
+        // Uncomment for debugging
+        Type = CommandType.Position;
+    }
+
+    public override void Execute()
+    {
+        foreach (Vertex vertex in _vertices)
         {
             _vertexPositions.Add(vertex, vertex.Position);
         }
     }
-    
-    public override void Execute() { }
 
     public override void Undo()
     {
@@ -35,27 +47,54 @@ public class MoveCommand : Command
     }
 }
 
-public class CreationCommand : Command
+public class DeleteVertexCommand : Command
 {
-    public Vertex Vertex;
-    public List<Vertex> ConnectedVertices;
+    private readonly Vertex _vertex;
+    private List<Vertex> _connectedVertices;
 
-    public CreationCommand(Vertex vertex)
+    public DeleteVertexCommand(Vertex vertex)
     {
-        Vertex = vertex;
-        ConnectedVertices = vertex.GetConnectedVertices();
+        _vertex = vertex;
     }
 
     public override void Execute()
     {
+        _connectedVertices = _vertex.GetConnectedVertices();
+        
+        // Uncomment for debugging
+        Type = CommandType.Delete;
     }
 
     public override void Undo()
     {
-        Vertex oldVertex = GraphMesh.Instance.Graph.AddVertex(Vertex);
-        foreach (Vertex vertex in ConnectedVertices)
+        Vertex oldVertex = GraphMesh.Instance.Graph.AddVertex(_vertex);
+        foreach (Vertex vertex in _connectedVertices)
         {
             GraphMesh.Instance.Graph.AddEdge(vertex, oldVertex);
+        }
+    }
+}
+
+public class CreateVertexCommand : Command
+{
+    private readonly List<Vertex> _vertices;
+
+    public CreateVertexCommand(List<Vertex> vertices)
+    {
+        _vertices = vertices;
+    }
+
+    public override void Execute()
+    {
+        // Uncomment for debugging
+        Type = CommandType.Create;
+    }
+
+    public override void Undo()
+    {
+        foreach (Vertex vertex in _vertices)
+        {
+            GraphMesh.Instance.Graph.RemoveVertex(vertex);
         }
     }
 }

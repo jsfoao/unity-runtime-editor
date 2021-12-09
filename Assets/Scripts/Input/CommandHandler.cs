@@ -24,8 +24,11 @@ public class CommandHandler
     }
     
     public bool EmptyStack() { return CommandStack.Count == 0; }
-    
-    public Command LastCommand() { return CommandStack.Peek(); }
+
+    public Command LastCommand()
+    {
+        return CommandStack.Count == 0 ? null : CommandStack.Peek();
+    }
     
     public Command RemoveLastCommand() { return CommandStack.Pop(); }
 }
