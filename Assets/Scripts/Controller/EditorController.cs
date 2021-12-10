@@ -91,6 +91,12 @@ public class EditorController : MonoBehaviour
     {
         MouseController.Instance.SelectionMode = SelectionMode.Multiple;
     }
+
+    public void AddVertexOnOrigin()
+    {
+        GraphManager.Instance.Graph.AddVertex(new Vertex(Vector3.zero));
+    }
+    
     public void Undo()
     {
         InputHandler.Instance.CommandHandler.Undo();
