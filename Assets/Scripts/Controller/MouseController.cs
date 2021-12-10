@@ -1,10 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Numerics;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEditor;
 using UnityEngine;
-using Plane = UnityEngine.Plane;
 using Vector3 = UnityEngine.Vector3;
 
 public enum Axis

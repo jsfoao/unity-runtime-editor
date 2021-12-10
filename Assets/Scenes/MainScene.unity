@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
   m_Layer: 0
-  m_Name: EditorCamera
+  m_Name: Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -233,7 +233,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1382467320}
   - component: {fileID: 1382467319}
-  - component: {fileID: 1382467318}
   m_Layer: 0
   m_Name: Graph
   m_TagString: Untagged
@@ -241,22 +240,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1382467318
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1382467317}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69919d804df46794487e59f0c7328493, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  edgeColor: {r: 0, g: 0, b: 0, a: 1}
-  vertexColor: {r: 0, g: 0, b: 0, a: 1}
-  edgeSize: 0
-  vertexSize: 0
 --- !u!114 &1382467319
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,7 +264,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1555375962
 GameObject:
@@ -296,8 +279,9 @@ GameObject:
   - component: {fileID: 1555375965}
   - component: {fileID: 1555375966}
   - component: {fileID: 1555375967}
+  - component: {fileID: 1555375968}
   m_Layer: 0
-  m_Name: EditorController
+  m_Name: EditorManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -640,62 +624,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbea31db241c42642b086f27bc8215aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HandleLength: 2.5
---- !u!1 &2077559287
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2077559290}
-  - component: {fileID: 2077559289}
-  - component: {fileID: 2077559288}
-  m_Layer: 0
-  m_Name: Grid
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2077559288
+--- !u!114 &1555375968
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2077559287}
+  m_GameObject: {fileID: 1555375962}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6f0dfd1eb797854799f0f0553535f95, type: 3}
+  m_Script: {fileID: 11500000, guid: 69919d804df46794487e59f0c7328493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridColor: {r: 0.3882353, g: 0.3882353, b: 0.3882353, a: 1}
---- !u!114 &2077559289
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2077559287}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75bda269ec5ddba4da6886f424718854, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Size: {x: 20, y: 20}
---- !u!4 &2077559290
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2077559287}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  gridColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
+  size: {x: 20, y: 20}
+  offset: 1
+  HandleLength: 2

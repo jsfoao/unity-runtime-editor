@@ -1,75 +1,43 @@
-using Drawing;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
-using Vector3 = UnityEngine.Vector3;
 
 public class GUIRenderer : MonoBehaviour
 {
-    public static GUIRenderer Instance;
-    
-    [Header("Handles")]
-    [SerializeField] public float HandleLength;
-
-    private Color _xColor;
-    private Color _yColor;
-    private Color _zColor;
-    private Color _xCurrentColor;
-    private Color _yCurrentColor;
-    private Color _zCurrentColor;
-    private Color _xSelectedColor;
-    private Color _ySelectedColor;
-    private Color _zSelectedColor;
-    
     private GUIListedLabel _guiGraphLabel;
     private GUIListedLabel _guiVertexLabel;
     private GUIListedLabel _guiMouseLabel;
     private GUIListedLabel _guiCommandLabel;
-    
-    private void HandleAxisRendering()
-    {
-        if (EditorController.Instance.SelectedVertices.Count == 0) { return; }
 
-        Vector3 position = EditorController.Instance.SelectedVertices[0].Position;
-        DrawAxisHandle(position, Vector3.right, _xCurrentColor);
-        DrawAxisHandle(position, Vector3.up, _yCurrentColor);
-        DrawAxisHandle(position, Vector3.forward, _zCurrentColor);
+    
+    private void SetupGUILabels()
+    {
+        // Mesh GUI
+        _guiGraphLabel = new GUIListedLabel(new Vector2(20, 20), "Custom Mesh");
+        _guiGraphLabel.CreateItem("Vertices");
+        _guiGraphLabel.CreateItem("Edges(Broken)");
         
-        switch (MouseController.Instance.HoveredAxis)
-        {
-            case Axis.X:
-                ResetHandles();
-                _xCurrentColor = _xSelectedColor;
-                break;
-            case Axis.Y:
-                ResetHandles();
-                _yCurrentColor = _ySelectedColor;
-                break;
-            case Axis.Z:
-                ResetHandles();
-                _zCurrentColor = _zSelectedColor;
-                break;
-            case Axis.None:        
-                ResetHandles();
-                break;
-        }
+        // Selected Vertex GUI
+        _guiVertexLabel = new GUIListedLabel(new Vector2(20, 100), "Selected Vertex");
+        _guiVertexLabel.CreateItem("Position");
+        _guiVertexLabel.CreateItem("EdgesCount");
+        
+        // Mouse GUI
+        _guiMouseLabel = new GUIListedLabel(new Vector2(20, 600), "Mouse State");
+        _guiMouseLabel.CreateItem("SelectionMode");
+        _guiMouseLabel.CreateItem("GrabState");
+        _guiMouseLabel.CreateItem("SelectionState");
+        _guiMouseLabel.CreateItem("GrabbedAxis");
+        _guiMouseLabel.CreateItem("HoveredAxis");
+        _guiMouseLabel.CreateItem("SelectedVertices");
+        
+        // Commands GUI
+        _guiCommandLabel = new GUIListedLabel(new Vector2(20, 500), "Commands");
+        _guiCommandLabel.CreateItem("LastCommand");
+        _guiCommandLabel.CreateItem("StackCount");
     }
-    
-    private void ResetHandles()
-    {
-        _xCurrentColor = _xColor;
-        _yCurrentColor = _yColor;
-        _zCurrentColor = _zColor;
-    }
-
-    private void DrawAxisHandle(Vector3 position, Vector3 direction, Color color)
-    {
-        Vector3 edgePosition = position + direction * HandleLength;
-        Draw.ingame.Line(position, edgePosition, color);
-        Draw.ingame.SolidBox(edgePosition, Vector3.one * 0.2f, color);
-    }
-    
     void OnGUI()
     {
+        #region GUI Labels
         _guiGraphLabel.Items["Vertices"].Value = GraphManager.Instance.Graph.Order.ToString();
         _guiGraphLabel.Items["Edges(Broken)"].Value = GraphManager.Instance.Graph.Size.ToString();
         _guiGraphLabel.Draw();
@@ -105,57 +73,10 @@ public class GUIRenderer : MonoBehaviour
             _guiCommandLabel.Items["StackCount"].Value = 0.ToString();
         }
         _guiCommandLabel.Draw();
-
-        HandleAxisRendering();
+        #endregion
     }
-    
-    private void SetupGUI()
-    {
-        // Mesh GUI
-        _guiGraphLabel = new GUIListedLabel(new Vector2(20, 20), "Custom Mesh");
-        _guiGraphLabel.CreateItem("Vertices");
-        _guiGraphLabel.CreateItem("Edges(Broken)");
-        
-        // Selected Vertex GUI
-        _guiVertexLabel = new GUIListedLabel(new Vector2(20, 100), "Selected Vertex");
-        _guiVertexLabel.CreateItem("Position");
-        _guiVertexLabel.CreateItem("EdgesCount");
-        
-        // Mouse GUI
-        _guiMouseLabel = new GUIListedLabel(new Vector2(20, 600), "Mouse State");
-        _guiMouseLabel.CreateItem("SelectionMode");
-        _guiMouseLabel.CreateItem("GrabState");
-        _guiMouseLabel.CreateItem("SelectionState");
-        _guiMouseLabel.CreateItem("GrabbedAxis");
-        _guiMouseLabel.CreateItem("HoveredAxis");
-        _guiMouseLabel.CreateItem("SelectedVertices");
-        
-        // Commands GUI
-        _guiCommandLabel = new GUIListedLabel(new Vector2(20, 500), "Commands");
-        _guiCommandLabel.CreateItem("LastCommand");
-        _guiCommandLabel.CreateItem("StackCount");
-    }
-    
     private void Awake()
     {
-        #region Singleton
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this);
-        }
-        #endregion
-        
-        SetupGUI();
-
-        _xColor = Color.red;
-        _yColor = Color.green;
-        _zColor = Color.blue;
-        _xSelectedColor = new Color(1f, 0.5f, 0.5f, 1);
-        _ySelectedColor = new Color(0.5f, 1f, 0.5f, 1);
-        _zSelectedColor = new Color(0.5f, 0.5f, 1f, 1);
+        SetupGUILabels();
     }
 }

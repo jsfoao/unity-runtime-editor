@@ -41,21 +41,21 @@ public static class Geometry
         Vector3 _zProjection = new Vector3(0f, 0f, Vector3.Dot(intersectXZ - position, Vector3.forward));
         Vector3 _yProjection = new Vector3(0f, Vector3.Dot(intersectXY - position, Vector3.up), 0f);
 
-        if ((_xProjection - relativeXZ).magnitude <= handleRange && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.x) >= 0)
+        if ((_xProjection - relativeXZ).magnitude <= handleRange && relativeXZ.magnitude <= EditorRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.x) >= 0)
         {
             xProjection = _xProjection;
             yProjection = _yProjection;
             zProjection = _zProjection;
             return Axis.X;
         }
-        if ((_zProjection - relativeXZ).magnitude <= handleRange && relativeXZ.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.z) >= 0)
+        if ((_zProjection - relativeXZ).magnitude <= handleRange && relativeXZ.magnitude <= EditorRenderer.Instance.HandleLength && Mathf.Sign(relativeXZ.z) >= 0)
         {
             xProjection = _xProjection;
             yProjection = _yProjection;
             zProjection = _zProjection;
             return Axis.Z;
         }
-        if ((_yProjection - relativeXY).magnitude <= handleRange && relativeXY.magnitude <= GUIRenderer.Instance.HandleLength && Mathf.Sign(relativeXY.y) >= 0)
+        if ((_yProjection - relativeXY).magnitude <= handleRange && relativeXY.magnitude <= EditorRenderer.Instance.HandleLength && Mathf.Sign(relativeXY.y) >= 0)
         {
             xProjection = _xProjection;
             yProjection = _yProjection;
