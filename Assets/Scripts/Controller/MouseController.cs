@@ -167,7 +167,7 @@ public class MouseController : MonoBehaviour
     {
         if (!_editorController.SelectedVertex()) { return; }
 
-        Command recordPosition = new VertexPositionCommand(_editorController.SelectedVertices);
+        Command recordPosition = new RecordPositionCommand(_editorController.SelectedVertices);
         InputHandler.Instance.CommandHandler.ExecuteCommand(recordPosition);
     }
 

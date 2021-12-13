@@ -18,34 +18,12 @@ public class EditorController : MonoBehaviour
 
     public void RemoveSelectedVertices()
     {
-        if (!SelectedVertex()) { return; }
-        InputHandler.Instance.CommandHandler.ExecuteCommand(new DeleteVertexCommand(SelectedVertices[0]));
-        
-        foreach (Vertex vertex in SelectedVertices)
-        {
-            GraphManager.Instance.Graph.RemoveVertex(vertex);
-        }
-        DeselectAll();
-        MouseController.Instance.ResetStates();
+        InputHandler.Instance.CommandHandler.ExecuteCommand(new DeleteVertexCommand());
     }
 
     public void AddVertexToSelectedVertices()
-    {            
-        if (!SelectedVertex()) { return; }
-        List<Vertex> addedVertex = new List<Vertex>();
-        InputHandler.Instance.CommandHandler.ExecuteCommand(new CreateVertexCommand(addedVertex));
-
-        foreach (Vertex vertex in SelectedVertices)
-        {
-            Vertex newVertex = GraphManager.Instance.Graph.AddConnectedVertex(vertex, new Vertex(vertex.Position));
-            addedVertex.Add(newVertex);
-        }
-
-        DeselectAll();
-        foreach (Vertex vertex in addedVertex)
-        {
-            vertex.Selectable.OnSelect();
-        }
+    {
+        InputHandler.Instance.CommandHandler.ExecuteCommand(new CreateVertexCommand());
     }
     
     public void SelectAll()

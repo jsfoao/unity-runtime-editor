@@ -13,7 +13,6 @@ public class CommandHandler
     {
         command.CommandHandler = this;
         command.Execute();
-        CommandStack.Push(command);
     }
     
     public void Undo()

@@ -42,12 +42,12 @@ public class Command
     public virtual void Undo() { }
 }
 
-public class VertexPositionCommand : Command
+public class RecordPositionCommand : Command
 {
     private readonly Dictionary<Vertex, Vector3> _vertexPositions;
     private readonly List<Vertex> _vertices;
 
-    public VertexPositionCommand(List<Vertex> vertices)
+    public RecordPositionCommand(List<Vertex> vertices)
     {
         _vertices = vertices;
         _vertexPositions = new Dictionary<Vertex, Vector3>();
@@ -62,6 +62,7 @@ public class VertexPositionCommand : Command
         {
             _vertexPositions.Add(vertex, vertex.Position);
         }
+        CommandHandler.CommandStack.Push(this);
     }
 
     public override void Undo()
@@ -75,20 +76,27 @@ public class VertexPositionCommand : Command
 
 public class DeleteVertexCommand : Command
 {
-    private readonly Vertex _vertex;
+    private Vertex _vertex;
     private List<Vertex> _connectedVertices;
-
-    public DeleteVertexCommand(Vertex vertex)
-    {
-        _vertex = vertex;
-    }
 
     public override void Execute()
     {
+        EditorController editorController = EditorController.Instance;
+        if (!editorController.SelectedVertex())
+        {
+            return;
+        }
+        _vertex = editorController.SelectedVertices[0];
         _connectedVertices = _vertex.GetConnectedVertices();
+        foreach (Vertex vertex in editorController.SelectedVertices)
+        {
+            GraphManager.Instance.Graph.RemoveVertex(vertex);
+        }
+        editorController.DeselectAll();
+        MouseController.Instance.ResetStates();
         
-        // Uncomment for debugging
         Type = CommandType.Delete;
+        CommandHandler.CommandStack.Push(this);
     }
 
     public override void Undo()
@@ -103,16 +111,29 @@ public class DeleteVertexCommand : Command
 
 public class CreateVertexCommand : Command
 {
-    private readonly List<Vertex> _vertices;
-
-    public CreateVertexCommand(List<Vertex> vertices)
-    {
-        _vertices = vertices;
-    }
+    private List<Vertex> _vertices;
 
     public override void Execute()
     {
-        // Uncomment for debugging
+        EditorController editorController = EditorController.Instance;
+
+        if (!editorController.SelectedVertex()) { return; }
+        List<Vertex> addedVertex = new List<Vertex>();
+        _vertices = addedVertex;
+        
+        foreach (Vertex vertex in editorController.SelectedVertices)
+        {
+            Vertex newVertex = GraphManager.Instance.Graph.AddConnectedVertex(vertex, new Vertex(vertex.Position));
+            addedVertex.Add(newVertex);
+        }
+
+        editorController.DeselectAll();
+        foreach (Vertex vertex in addedVertex)
+        {
+            vertex.Selectable.OnSelect();
+        }
+        
+        CommandHandler.CommandStack.Push(this);
         Type = CommandType.Create;
     }
 
