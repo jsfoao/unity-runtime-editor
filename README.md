@@ -10,7 +10,7 @@ Download Build: https://jwow.itch.io/runtime-graph-editor
  - **Undo and Redo** functionality
  - Editor that feels natural and **easy to work with**.
  
- [![Demo](https://i.gyazo.com/1464ba7e4fd20b9d4dfc83fc2c1ff4fe.gif)
+ ![Demo](https://www.joaofreire.se/assets/img/projects/runtime-editor/image3.gif)
 
 ## List of Features
 | Feature| Description |
